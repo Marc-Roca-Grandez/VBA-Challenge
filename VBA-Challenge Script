@@ -1,0 +1,132 @@
+Sub VBAChallengeTesting()
+
+'loop each ws
+For Each ws In Worksheets
+    
+    'find last row
+    LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    'define variables
+    Dim Ticker As String
+    Dim i As Double
+    
+    'Summary table location
+    Dim Summary_Table_Row As Integer
+    Summary_Table_Row = 2
+    
+    'Yearly change Variable
+    Dim OpeningPrice As Double
+    Dim ClosingPrice As Double
+
+    ' Set an initial variable for holding the variable
+    Dim VolTotal As Double
+    VolTotal = 0
+
+    'create headers for the table
+    ws.Cells(1, 9).Value = "Ticker"
+    ws.Cells(1, 10).Value = "Yearly Change"
+    ws.Cells(1, 11).Value = "Percent Change"
+    ws.Cells(1, 12).Value = "Total Stock Volume"
+
+    Dim n As Double
+    n = 1
+    'content for ticker
+    For i = 2 To LastRow
+        If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+          ' Set the Ticker
+          Ticker = ws.Cells(i, 1).Value
+          ' Print the Ticker in the Summary Table
+          ws.Range("i" & Summary_Table_Row).Value = Ticker
+          
+          ' Set the ClosingPrice
+          ClosingPrice = ws.Cells(i, 6).Value
+          ' Print the Price change in the Summary Table CHECK!!!!
+          ws.Range("j" & Summary_Table_Row).Value = ClosingPrice - OpeningPrice
+          'rico suave
+          n = 1
+          
+           ' Print the %change in the Summary Table
+          ws.Range("k" & Summary_Table_Row).Value = (ClosingPrice - OpeningPrice) / OpeningPrice
+          ws.Range("k" & Summary_Table_Row).NumberFormat = "0.00%"
+          
+          ' Set the Voltotal
+          VolTotal = VolTotal + Cells(i, 7).Value
+          ' Print the vol in the Summary Table Check!
+          ws.Range("l" & Summary_Table_Row).Value = VolTotal
+          
+          'add to summary row
+          Summary_Table_Row = Summary_Table_Row + 1
+          'reseting VoltTotal
+          VolTotal = 0
+          
+        ElseIf ws.Cells(i + 1, 1).Value = ws.Cells(i, 1).Value Then
+                ' Set the OpeningPrice
+                'OpeningPrice = Cells(i, 3).Value
+         ' Set the Voltotal
+          VolTotal = VolTotal + Cells(i, 7).Value
+          'rico suave
+          If n = 1 Then
+            OpeningPrice = ws.Cells(i, 3).Value
+            n = n + 1
+            End If
+          '-----------
+        End If
+        
+    Next i
+    'Do conditional Formatting for percent Change
+    Dim Total_Summary_Table_Row As Integer
+    Total_Summary_Table_Row = ws.Cells(Rows.Count, 10).End(xlUp).Row
+    For i = 2 To Total_Summary_Table_Row
+        If ws.Cells(i, 10) > 0 Then
+            ws.Cells(i, 10).Interior.ColorIndex = 4
+        ElseIf ws.Cells(i, 10) < 0 Then
+            ws.Cells(i, 10).Interior.ColorIndex = 3
+        End If
+    Next i
+    
+    'Bonus ------------------------------------------------------
+    ws.Cells(2, 15).Value = "Greatest % Increase"
+    ws.Cells(3, 15).Value = "Greatest % Decrease"
+    ws.Cells(4, 15).Value = "Greatest Total Volume"
+    ws.Cells(1, 16).Value = "Ticker"
+    ws.Cells(1, 17).Value = "Value"
+    
+    Dim maxincrease As Double
+    Dim maxdecrease As Double
+    Dim SummaryVolume As Double
+    Dim IncreaseSummaryTicker As String
+    Dim DecreaseSummaryTicker As String
+    Dim SummaryVolumeTicker As String
+    
+    maxincrease = Cells(2, 11)
+    IncreaseSummaryTicker = Cells(2, 9)
+    maxdecrease = Cells(2, 11)
+    DecreaseSummaryTicker = Cells(2, 9)
+    SummaryVolume = Cells(2, 12)
+    SummaryVolumeTicker = Cells(2, 9)
+    
+    
+    For i = 2 To Total_Summary_Table_Row
+        If maxincrease < ws.Cells(i + 1, 11) Then
+            maxincrease = ws.Cells(i + 1, 11)
+            IncreaseSummaryTicker = ws.Cells(i + 1, 9)
+        End If
+        If maxdecrease > ws.Cells(i + 1, 11) Then
+            maxdecrease = ws.Cells(i + 1, 11)
+            DecreaseSummaryTicker = ws.Cells(i + 1, 9)
+        End If
+        If SummaryVolume < ws.Cells(i + 1, 12) Then
+            SummaryVolume = ws.Cells(i + 1, 12)
+            SummaryVolumeTicker = ws.Cells(i + 1, 9)
+        End If
+    Next i
+    ws.Cells(2, 17).Value = maxincrease
+    ws.Cells(3, 17).Value = maxdecrease
+    ws.Cells(2, 16).Value = IncreaseSummaryTicker
+    ws.Cells(3, 16).Value = DecreaseSummaryTicker
+    ws.Cells(4, 17).Value = SummaryVolume
+    ws.Cells(4, 16).Value = SummaryVolumeTicker
+    ws.Range("Q2", "Q3").NumberFormat = "0.00%"
+Next ws
+End Sub
+
